@@ -72,4 +72,70 @@ if(o.type=='btn')return`<button class=cb data-a=open style="${s}">${esc(o.text)}
 if(o.type=='text')return`<div class=tx style="${s}">${esc(o.text)}</div>`;
 if(o.type=='img')return o.src?`<img class="sh-${o.shape}" src="${o.src}" alt="">`:`<div class="ph sh-${o.shape}">Foto</div>`;
 if(o.type=='cd')return`<div class=cd><div><b>0</b><small>Hari</small></div><div><b>0</b><small>Jam</small></div><div><b>0</b><small>Menit</small></div><div><b>0</b><small>Detik</small></div></div>`;
-return`<div class=mp><div class=tx style="${s}">📍 ${esc(o.text)}</div><a href="${esc(S.map||'#')}" target=_blank rel=no
+return`<div class=mp><div class=tx style="${s}">📍 ${esc(o.text)}</div><a href="${esc(S.map||'#')}" target=_blank rel=noopener>Buka Peta</a></div>`}
+function render(){theme();const H=S.pages*780;app.style.height=`calc(var(--u)*${H})`;
+let h='';for(let i=0;i<S.pages;i++)h+=`<div class=pg style="top:calc(var(--u)*${i*780});${S.pbg[i]?`background-image:url(${S.pbg[i]})`:''}"></div>`;
+S.els.forEach(o=>{h+=eh(o,!ed)});
+app.innerHTML=h;if(ed)cover();tick()}
+function eh(o,pre){return`<div class="el${o.vis?'':' hid'}${sel&&sel.id==o.id?' sel':''}" data-id=${o.id} style="left:calc(var(--u)*${o.x});top:calc(var(--u)*${o.y});width:calc(var(--u)*${o.w})"><div class="in${o.anim?' a-'+o.anim:''}${pre?' pre':''}" style="--d:${o.d}s;--dl:${o.dl}s"><div class="lp${o.loop?' l-'+o.loop:''}">${body(o)}</div></div></div>`}
+const ALL=()=>S.els.concat(S.cels);
+function tick(){const d=Math.max(0,new Date(S.date)-Date.now())/1e3,v=[d/86400,d%86400/3600,d%3600/60,d%60];document.querySelectorAll('.cd b').forEach((b,i)=>b.textContent=Math.floor(v[i]))}
+setInterval(tick,1000);
+let io;function observe(){io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.firstChild.classList.remove('pre');io.unobserve(e.target)}}),{threshold:.1});document.querySelectorAll('.el').forEach(e=>io.observe(e))}
+const au=new Audio();au.loop=true;
+function cover(){cov.innerHTML=`<div class=cw><div class=env><div class=eb></div><div class=kt style="${S.cimg?`background-image:url(${S.cimg})`:''}"></div><div class=pl></div><div class=pr2></div><div class=pb></div><div class=efw><div class=ef></div><img class=seal data-a=open src="${S.seal}" style="--ss:${S.ss}" alt=""></div></div><div class=stg>${S.cels.map(o=>eh(o,false)).join('')}</div></div>`}
+function open_(){if(ed)return;if(cov.classList.contains('op'))return;cov.classList.add('op');if(S.music){au.src=S.music;au.play().catch(()=>{})}setTimeout(observe,1700);setTimeout(()=>{cov.style.display='none';muteBtn()},2600)}
+function muteBtn(){if(!S.music||ed)return;ui.innerHTML=`<button class=fab data-a=mute style="bottom:70px">${au.paused?'🔇':'🔊'}</button>`+fabHTML()}
+const fabHTML=()=>can?`<button class=fab data-a=edit>✎</button>`:'';let can=!window.claude;
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2600)}
+function img(max){return new Promise(res=>{const f=$('#f');f.accept='image/*';f.onchange=()=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/webp',.85))};im.src=r.result};r.readAsDataURL(f.files[0]);f.value=''};f.click()})}
+const op=(a,v)=>`<option value="${a}"${a==v?' selected':''}>${''}`;
+const SEL=(k,o,v,s)=>`<select data-k=${k}${s?' data-s=1':''}>${o.map(x=>`<option value="${x[0]}"${x[0]==v?' selected':''}>${x[1]}</option>`).join('')}</select>`;
+const RG=(k,a,b,st,v,l)=>`<label>${l}<input type=range data-k=${k} min=${a} max=${b} step=${st} value=${v}></label>`;
+const FO=F.map(f=>[f,f]);
+function UI(){if(!ed)return;const cvv=tab=='cover'||(tab=='el'&&sel&&S.cels.includes(sel));cov.style.display=cvv?'block':'none';cov.classList.toggle('sm',cvv);cov.classList.remove('op');let p='';const o=sel;
+const tabs=[['el','Elemen'],['cover','Cover'],['add','Tambah'],['tema','Tema'],['data','Data'],['list','Daftar']].map(t=>`<button data-a=tab:${t[0]} class="${tab==t[0]?'on':''}">${t[1]}</button>`).join('');
+if(tab=='el'){if(!o)p='<p>Sentuh elemen di undangan untuk memilih, lalu geser dengan jari.</p>';else{
+p=`<div class=g>${o.type!='img'&&o.type!='cd'?`<label class=w2>Teks<textarea rows=3 data-k=text>${esc(o.text)}</textarea></label><label>Font${SEL('font',FO,o.font)}</label><label>Warna<input type=color data-k=color value="${o.color||'#444444'}"></label>${RG('size',8,90,1,o.size,'Ukuran tulisan')}`:''}`;
+if(o.type=='img')p+=`<label>Bentuk${SEL('shape',[['arch','Lengkung'],['oval','Oval'],['circle','Lingkaran'],['box','Kotak'],['free','Bebas (hiasan)']],o.shape)}</label><button data-a=rep class=pr>Ganti foto</button>`;
+p+=`${RG('w',30,500,1,o.w,'Lebar / ukuran')}${SEL('anim',AI,o.anim).replace('<select','<label class=w2>Animasi masuk<select')+'</label>'}<label class=w2>Animasi gerak${SEL('loop',AL,o.loop)}</label>${RG('d',.2,4,.1,o.d,'Durasi')}${RG('dl',0,4,.1,o.dl,'Jeda')}<label>Tampilkan<input type=checkbox data-k=vis ${o.vis?'checked':''}></label></div><div class=row style="margin-top:8px"><button data-a=mv:-4,0>◀</button><button data-a=mv:0,-4>▲</button><button data-a=mv:0,4>▼</button><button data-a=mv:4,0>▶</button><button data-a=prev>Putar animasi</button><button data-a=dup>Gandakan</button><button data-a=del>Hapus</button></div>`}}
+if(tab=='cover')p=`<div class=g><button data-a=addCT>+ Teks cover</button><button data-a=addCI>+ Gambar hiasan cover</button><button data-a=seal class=pr>Ganti gambar segel</button><button data-a=sealx>Segel awal</button>${RG('ss',50,160,1,S.ss,'Ukuran segel').replace('<input','<input data-s=1')}<button data-a=cimg>Gambar di kartu amplop</button><button data-a=cimgx>Hapus gambar kartu</button><button data-a=rp class=w2>Lihat ulang cover</button></div><p style="color:#bbb;font-size:11px">Sentuh teks atau gambar di cover untuk memilih, lalu geser atau atur di tab Elemen.</p>`;
+if(tab=='add')p=`<div class=g><button data-a=addT>+ Teks baru</button><button data-a=addI>+ Foto dari galeri</button><button data-a=addD>+ Hiasan (gambar)</button><button data-a=addP>+ Halaman</button><button data-a=delP>− Halaman</button></div>`;
+if(tab=='tema')p=`<div class=g>${Object.keys(TH).map(k=>`<button class=sw data-a=th:${k} style="background:${TH[k][1]}">${TH[k][0]}</button>`).join('')}</div><div class=g style="margin-top:10px"><label class=w2>Font untuk semua tulisan<select id=fa>${FO.map(x=>`<option>${x[0]}</option>`).join('')}</select></label><button data-a=fall class=pr>Terapkan ke semua</button><label>Latar halaman<select id=pgs>${Array.from({length:S.pages},(_,i)=>`<option value=${i}>Halaman ${i+1}</option>`)}</select></label><button data-a=pbg>Ganti latar</button><button data-a=pbgx>Hapus latar</button></div>`;
+if(tab=='data'){const L=(k,l,t='text')=>`<label class=w2>${l}<input type=${t} data-s=1 data-k=${k} value="${esc(S[k])}"></label>`;p=`<div class=g>${L('date','Tanggal hitung mundur','datetime-local')}${L('map','Link Google Maps (https://...)')}${L('link','Link undangan untuk WhatsApp')}<button data-a=mus>Tambah musik</button><button data-a=musx>Hapus musik</button></div>`}
+if(tab=='list')p=ALL().map(e=>`<div class=li><span data-a=pick:${e.id}>${e.text!=null?esc(e.text.slice(0,28)):e.type=='img'?'Gambar':'Hitung mundur'}</span><input type=checkbox data-a=vis:${e.id} ${e.vis?'checked':''}></div>`).join('');
+ui.innerHTML=`<div id=top><button data-a=exit>✕ Keluar</button><button class=pr data-a=save>Simpan & Bagikan</button><button data-a=wa>WhatsApp</button></div><div class=pn><div class=tabs>${tabs}</div>${p}</div><input type=file id=f hidden>`}
+function setEd(v){ed=v;document.body.classList.toggle('ed',v);if(v){cov.style.display='none';au.pause();UI()}else{cov.style.display='none';cov.classList.remove('sm');ui.innerHTML=fabHTML()+'<input type=file id=f hidden>'}render();if(!v)observe()}
+const mv=(a)=>{const[x,y]=a.split(',').map(Number);sel.x+=x;sel.y+=y;render()};
+async function act(a){const[k,v]=[a.split(':')[0],a.slice(a.indexOf(':')+1)];
+if(k=='open')return open_();if(k=='edit'){cov.style.display='none';return setEd(true)}if(k=='exit')return setEd(false);
+if(k=='mute'){au.paused?au.play():au.pause();return muteBtn()}
+if(k=='tab'){tab=v;return UI()}
+if(k=='addT'){const o=T('Teks baru',scrollY/(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u'))||1)+200,24,'Great Vibes');S.els.push(o);sel=o;tab='el'}
+if(k=='addI'||k=='addD'){const src=await img(k=='addD'?700:1100),o=I(scrollY/(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u'))||1)+200,k=='addD'?120:200,k=='addD'?'free':'box');o.src=src;S.els.push(o);sel=o;tab='el'}
+if(k=='addP')S.pages++;if(k=='delP'&&S.pages>1)S.pages--;
+if(k=='rep'){sel.src=await img(1100)}
+if(k=='del'){S.els=S.els.filter(e=>e!=sel);S.cels=S.cels.filter(e=>e!=sel);sel=null}if(k=='dup'){const c={...sel,id:id(),x:sel.x+12,y:sel.y+12};(S.cels.includes(sel)?S.cels:S.els).push(c);sel=c}
+if(k=='addCT'){const o=T('Teks baru',300,26,'Great Vibes');S.cels.push(o);sel=o;tab='el'}
+if(k=='addCI'){const o=I(300,120,'free');o.src=await img(700);S.cels.push(o);sel=o;tab='el'}
+if(k=='seal'){S.seal=await img(400)}if(k=='sealx')S.seal=SEAL;if(k=='cimg'){S.cimg=await img(900)}if(k=='cimgx')S.cimg='';
+if(k=='rp'){cov.classList.remove('op','sm');cov.style.display='block';setTimeout(()=>cov.classList.add('op'),500);setTimeout(()=>cov.classList.remove('op'),3600);return}
+if(k=='mv')return mv(v);if(k=='prev'){const e=$('.el.sel .in');e.classList.add('pre');void e.offsetWidth;e.classList.remove('pre');return}
+if(k=='th'){S.theme=v}if(k=='fall'){S.els.forEach(e=>{if(e.type=='text'||e.type=='map')e.font=$('#fa').value})}
+if(k=='pbg'){S.pbg[$('#pgs').value]=await img(1000)}if(k=='pbgx'){delete S.pbg[$('#pgs').value]}
+if(k=='mus'){const f=$('#f');f.accept='audio/*';f.onchange=()=>{const r=new FileReader();r.onload=()=>{S.music=r.result;toast('Musik ditambahkan')};r.readAsDataURL(f.files[0]);f.value=''};f.click();return}
+if(k=='musx')S.music='';
+if(k=='pick'){sel=ALL().find(e=>e.id==v);tab='el'}if(k=='vis'){const e=ALL().find(e=>e.id==v);e.vis=e.vis?0:1;return render()}
+if(k=='wa')return window.open('https://wa.me/?text='+encodeURIComponent('Kami mengundang Anda ke pernikahan kami: '+(S.link||location.href)));
+if(k=='save')return save();
+render();UI()}
+async function save(){try{const a=await claude.use('artifact');if(!a)return toast('Penyimpanan tidak tersedia');toast('Menyimpan...');const c=document.documentElement.cloneNode(true);['#app','#cov','#ui'].forEach(s=>c.querySelector(s).innerHTML='');c.removeAttribute('style');c.querySelector('body').removeAttribute('class');c.querySelector('#cov').removeAttribute('style');c.querySelector('#S').textContent=JSON.stringify(S).replace(/</g,'\\u003c');await a.publish('<!DOCTYPE html>'+c.outerHTML)}catch(e){toast('Gagal menyimpan')}}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(t&&t.type!='checkbox'){e.preventDefault();act(t.dataset.a)}else if(ed&&e.target.closest('.mp a'))e.preventDefault()});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.a&&t.type=='checkbox')act(t.dataset.a)});
+document.addEventListener('input',e=>{const t=e.target,k=t.dataset.k;if(!k)return;const v=t.type=='checkbox'?(t.checked?1:0):t.type=='range'?+t.value:t.value;(t.dataset.s?S:sel)[k]=v;render()});
+function pd(e){if(!ed)return;const el=e.target.closest('.el');if(!el)return;sel=ALL().find(o=>o.id==el.dataset.id);if(!sel)return;st={x:e.clientX,y:e.clientY,ox:sel.x,oy:sel.y};drag=el;el.setPointerCapture(e.pointerId);document.querySelectorAll('.el.sel').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');tab='el';UI()}
+function pm(e){if(!drag)return;const u=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u'))*(cov.contains(drag)?.6:1);sel.x=st.ox+(e.clientX-st.x)/u;sel.y=st.oy+(e.clientY-st.y)/u;drag.style.left=`calc(var(--u)*${sel.x})`;drag.style.top=`calc(var(--u)*${sel.y})`}
+[app,cov].forEach(x=>{x.addEventListener('pointerdown',pd);x.addEventListener('pointermove',pm);x.addEventListener('pointerup',()=>drag=null)});
+fit();addEventListener('resize',fit);render();cover();ui.innerHTML=fabHTML()+'<input type=file id=f hidden>';
+(async()=>{try{const u=await claude.use('user');if(u&&u.canEdit()){can=true;ui.innerHTML=fabHTML()+'<input type=file id=f hidden>'}}catch(e){}})();
+</script></body></html>
