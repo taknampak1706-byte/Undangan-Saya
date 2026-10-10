@@ -33,7 +33,7 @@ body.ed .el{touch-action:none;cursor:move;outline:1px dashed rgba(120,120,120,.6
 .pl,.pr2,.pb{inset:0;z-index:2}.pl{clip-path:polygon(0 0,52% 52%,0 100%);background:var(--nz),linear-gradient(90deg,#f0e5c8,#e6d8b6)}.pr2{clip-path:polygon(100% 0,48% 52%,100% 100%);background:var(--nz),linear-gradient(270deg,#eee2c3,#e4d5b1)}.pb{clip-path:polygon(0 100%,50% 46%,100% 100%);background:var(--nz),linear-gradient(#f6efdb,#efe4c6)}
 .efw{left:0;top:0;width:100%;height:56%;transform-origin:50% 0;z-index:4;filter:drop-shadow(0 3px 4px rgba(50,35,10,.3));transition:transform 1s ease,z-index 0s .5s}.ef{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 100%);background:var(--nz),linear-gradient(#f4ead0,#e8dbb8)}.op .efw{transform:rotateX(180deg);z-index:0}
 .seal{position:absolute;left:50%;top:100%;transform:translate(-50%,-50%);width:calc(var(--u)*var(--ss,84));cursor:pointer;filter:drop-shadow(0 4px 5px rgba(40,25,5,.4));transition:opacity .3s}.op .seal{opacity:0}
-.cb{padding:8px 20px;border-radius:30px;background:var(--ink);color:#fff;border:0;cursor:pointer}.tabs{overflow-x:auto}
+.lp{text-align:center}.cb{padding:8px 20px;border-radius:30px;background:var(--ink);color:#fff;border:0;cursor:pointer}.tabs{overflow-x:auto}
 #ui{font:13px system-ui,sans-serif;color:#eee}#ui button,#ui select,#ui input,#ui textarea{font:inherit}
 .fab{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0));z-index:300;width:46px;height:46px;border-radius:50%;border:0;background:#b8923f;color:#fff;font-size:20px}
 #top{position:fixed;left:0;right:0;top:0;z-index:300;display:flex;gap:6px;padding:calc(6px + env(safe-area-inset-top,0)) 8px 6px;background:#1c1c1cf2;overflow-x:auto}
@@ -75,7 +75,7 @@ T('MENUJU HARI BAHAGIA',2385,12,'Cinzel'),{id:id(),type:'cd',x:195,y:2425,w:340,
 {id:id(),type:'map',text:'Gedung Serbaguna\nJl. Contoh No. 1, Kota',x:195,y:2790,w:290,size:15,font:'Cormorant Garamond',color:'',anim:'up',loop:'',d:1,dl:0,vis:1},
 T('Terima kasih',3300,44,'Great Vibes'),T('Merupakan kehormatan bagi kami atas kehadiran dan doa restu Anda.',3380,16),T('Brandon & Meyca',3450,32,'Great Vibes')]}
 if(!S.cels){S.cels=[T('The Wedding of',60,13,'Cinzel'),T('Brandon & Meyca',95,46,'Great Vibes'),T('Kepada Yth.',525,15),T('Tamu Undangan',552,22,'Playfair Display'),{id:id(),type:'btn',text:'Buka Undangan',x:195,y:610,w:200,size:15,font:'Montserrat',color:'',anim:'zoom',loop:'',d:1,dl:0,vis:1}]}
-S.seal=S.seal||SEAL;S.ss=S.ss||84;S.cimg=S.cimg||'';S.pbg=S.pbg||{};S.pages=S.pages||5;S.map=S.map||'';S.music=S.music||'';S.date=S.date||'2027-01-10T08:00';S.theme=S.theme||'sage'}
+S.seal=S.seal||SEAL;S.ss=S.ss||84;S.cimg=S.cimg||'';S.pbg=S.pbg||{};S.pages=S.pages||5;S.map=S.map||'';S.music=S.music||'';S.date=S.date||'2027-01-10T08:00';S.theme=S.theme||'sage';if(S.edit===undefined)S.edit=1}
 function setS(o){for(const k in S)delete S[k];Object.assign(S,o);defaults()}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function fit(){document.documentElement.style.setProperty('--u',Math.min(innerWidth,520)/390+'px')}
@@ -99,7 +99,7 @@ const au=new Audio();au.loop=true;
 function cover(){cov.innerHTML=`<div class=cw><div class=env><div class=eb></div><div class=kt style="${S.cimg?`background-image:url(${S.cimg})`:''}"></div><div class=pl></div><div class=pr2></div><div class=pb></div><div class=efw><div class=ef></div><img class=seal data-a=open src="${S.seal}" style="--ss:${S.ss}" alt=""></div></div><div class=stg>${S.cels.map(o=>eh(o,false)).join('')}</div></div>`}
 function open_(){if(ed)return;if(cov.classList.contains('op'))return;cov.classList.add('op');if(S.music){au.src=S.music;au.play().catch(()=>{})}setTimeout(observe,1700);setTimeout(()=>{cov.style.display='none';muteBtn()},2600)}
 function muteBtn(){if(!S.music||ed)return;ui.innerHTML=`<button class=fab data-a=mute style="bottom:70px">${au.paused?'🔇':'🔊'}</button>`+fabHTML()}
-const fabHTML=()=>can?`<button class=fab data-a=edit>✎</button>`:'';let can=location.hash=='#edit';
+const fabHTML=()=>can?`<button class=fab data-a=edit>✎</button>`:'';let can=false;
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',3200)}
 function img(max){return new Promise(res=>{const f=$('#f');f.accept='image/*';f.onchange=()=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/webp',.85))};im.src=r.result};r.readAsDataURL(f.files[0]);f.value=''};f.click()})}
 const SEL=(k,o,v,s)=>`<select data-k=${k}${s?' data-s=1':''}>${o.map(x=>`<option value="${x[0]}"${x[0]==v?' selected':''}>${x[1]}</option>`).join('')}</select>`;
@@ -116,7 +116,7 @@ if(tab=='add')p=`<div class=g><button data-a=addT>+ Teks baru</button><button da
 if(tab=='tema')p=`<div class=g>${Object.keys(TH).map(k=>`<button class=sw data-a=th:${k} style="background:${TH[k][1]}">${TH[k][0]}</button>`).join('')}</div><div class=g style="margin-top:10px"><label class=w2>Font untuk semua tulisan<select id=fa>${FO.map(x=>`<option>${x[0]}</option>`).join('')}</select></label><button data-a=fall class=pr>Terapkan ke semua</button><label>Latar halaman<select id=pgs>${Array.from({length:S.pages},(_,i)=>`<option value=${i}>Halaman ${i+1}</option>`)}</select></label><button data-a=pbg>Ganti latar</button><button data-a=pbgx>Hapus latar</button></div>`;
 if(tab=='data'){const L=(k,l,t='text')=>`<label class=w2>${l}<input type=${t} data-s=1 data-k=${k} value="${esc(S[k]||'')}"></label>`;p=`<div class=g>${L('date','Tanggal hitung mundur','datetime-local')}${L('map','Link Google Maps (https://...)')}<label class=w2>Nama link undangan (huruf kecil, angka, tanda hubung)<input data-sl value="${esc(slug)}"></label><button data-a=cp class=w2>Salin link tamu</button><button data-a=mus>Tambah musik</button><button data-a=musx>Hapus musik</button></div><p style="color:#bbb;font-size:11px;word-break:break-all">Link tamu: ${esc(shareLink())}</p>`}
 if(tab=='list')p=ALL().map(e=>`<div class=li><span data-a=pick:${e.id}>${e.text!=null?esc(e.text.slice(0,28)):e.type=='img'?'Gambar':'Hitung mundur'}</span><input type=checkbox data-a=vis:${e.id} ${e.vis?'checked':''}></div>`).join('');
-ui.innerHTML=`<div id=top><button data-a=exit>✕ Keluar</button><button class=pr data-a=save>Simpan & Bagikan</button><button data-a=wa>WhatsApp</button></div><div class=pn><div class=tabs>${tabs}</div>${p}</div><input type=file id=f hidden>`}
+ui.innerHTML=`<div id=top><button data-a=exit>✕ Keluar</button><button data-a=tg>Fitur edit di link: ${S.edit!==0?'Tampil':'Sembunyi'}</button><button class=pr data-a=save>Simpan & Bagikan</button><button data-a=wa>WhatsApp</button></div><div class=pn><div class=tabs>${tabs}</div>${p}</div><input type=file id=f hidden>`}
 function setEd(v){ed=v;document.body.classList.toggle('ed',v);if(v){cov.style.display='none';au.pause();UI()}else{cov.style.display='none';cov.classList.remove('sm');ui.innerHTML=fabHTML()+'<input type=file id=f hidden>'}render();if(!v)observe()}
 const mv=(a)=>{const[x,y]=a.split(',').map(Number);sel.x+=x;sel.y+=y;render()};
 async function act(a){const[k,v]=[a.split(':')[0],a.slice(a.indexOf(':')+1)];
@@ -138,13 +138,14 @@ if(k=='pbg'){S.pbg[$('#pgs').value]=await img(1000)}if(k=='pbgx'){delete S.pbg[$
 if(k=='mus'){const f=$('#f');f.accept='audio/*';f.onchange=()=>{const fl=f.files[0];if(!fl)return;if(fl.size>7e6){f.value='';return toast('Musik maksimal 7 MB')}const r=new FileReader();r.onload=()=>{S.music=r.result;draft();toast('Musik ditambahkan')};r.readAsDataURL(fl);f.value=''};f.click();return}
 if(k=='musx')S.music='';
 if(k=='pick'){sel=ALL().find(e=>e.id==v);tab='el'}if(k=='vis'){const e=ALL().find(e=>e.id==v);e.vis=e.vis?0:1;return render()}
+if(k=='tg'){S.edit=S.edit===0?1:0;toast(S.edit===0?'Link tamu tanpa fitur edit':'Link tamu dengan fitur edit');draft()}
 if(k=='cp'){navigator.clipboard&&navigator.clipboard.writeText(shareLink());return toast('Link disalin')}
 if(k=='wa')return window.open('https://wa.me/?text='+encodeURIComponent('Kami mengundang Anda ke pernikahan kami: '+shareLink()));
 if(k=='save')return save();
 render();UI()}
 async function save(){try{toast('Menyimpan...');const A={},P=pack(JSON.parse(JSON.stringify(S)),A),ts=Date.now();
 const r=await fetch(dbUrl+'undangan/'+slug+'.json',{method:'PUT',body:JSON.stringify({ts,s:P,a:A})});if(!r.ok)throw 0;
-idb('set','pub:'+slug,{ts,S:S});idb('del','draft:'+slug);history.replaceState(null,'','?u='+slug+'#edit');
+idb('set','pub:'+slug,{ts,S:S});idb('set','owner:'+slug,1);idb('del','draft:'+slug);history.replaceState(null,'','?u='+slug);
 navigator.clipboard&&navigator.clipboard.writeText(shareLink());toast('Tersimpan. Link tamu disalin.')}catch(e){toast('Gagal menyimpan. Periksa aturan Firebase dan koneksi.')}}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(t&&t.type!='checkbox'){e.preventDefault();act(t.dataset.a)}else if(ed&&e.target.closest('.mp a'))e.preventDefault()});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset.a&&t.type=='checkbox')act(t.dataset.a)});
@@ -156,11 +157,12 @@ function pm(e){if(!drag)return;const u=parseFloat(getComputedStyle(document.docu
 fit();addEventListener('resize',fit);
 cov.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#2d3a2b;font:14px sans-serif">Memuat...</div>';
 let o=null,ts=0,own=0,bg=0;
-if(can){const d=await idb('get','draft:'+slug);if(d){o=d.S;own=1}}
-if(!o&&can){const r=await remote().catch(()=>0);if(r){o=r.S;ts=r.ts;idb('set','pub:'+slug,r)}}
+const ow=await idb('get','owner:'+slug)||location.hash=='#edit';
+if(ow){const d=await idb('get','draft:'+slug);if(d){o=d.S;own=1}}
+if(!o&&ow){const r=await remote().catch(()=>0);if(r){o=r.S;ts=r.ts;idb('set','pub:'+slug,r)}}
 if(!o){const c=await idb('get','pub:'+slug);if(c){o=c.S;ts=c.ts;bg=1}}
 if(!o){const r=await remote().catch(()=>0);if(r){o=r.S;ts=r.ts;idb('set','pub:'+slug,r)}}
-setS(o||{});render();cover();ui.innerHTML=fabHTML()+'<input type=file id=f hidden>';
+setS(o||{});can=S.edit!==0||!!ow;render();cover();ui.innerHTML=fabHTML()+'<input type=file id=f hidden>';
 if(own)toast('Draf terakhir dipulihkan');
 if(bg)remote().then(r=>{if(r&&r.ts>ts){idb('set','pub:'+slug,r);if(!ed&&!cov.classList.contains('op')&&cov.style.display!='none'){setS(r.S);render();cover()}}}).catch(()=>{});
 })();
