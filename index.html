@@ -89,7 +89,7 @@ const oldGet=k=>new Promise(r=>{try{const q=indexedDB.open('undangan');q.onupgra
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let pT=0,dirty=false,NOIDB=false;
 function persistNow(force){clearTimeout(pT);if(!dirty&&!force)return Promise.resolve(true);dirty=false;
-  const ls=()=>{try{localStorage.setItem('inv',JSON.stringify(S));return true}catch(e){toast('Penyimpanan penuh. Kecilkan foto atau audio.');return false}};
+  const ls=()=>{try{localStorage.setItem('inv',JSON.stringify(S));return true}catch(e){if(Date.now()-(window.__tw||0)>15e3){window.__tw=Date.now();toast(NOIDB?'Penyimpanan besar browser tidak bisa dipakai, jadi hasil edit belum tersimpan. Matikan mode pribadi lalu muat ulang.':'Gagal menyimpan di HP ini. Ruang penyimpanan HP mungkin penuh.',7000)}return false}};
   if(NOIDB)return Promise.resolve(ls());
   return idbSet('inv',S).then(ok=>{if(ok){try{localStorage.removeItem('inv')}catch(e){}stInfo();return true}return ls()})}
 const persist=()=>{dirty=true;clearTimeout(pT);pT=setTimeout(persistNow,300)};
@@ -280,7 +280,8 @@ function pu(){if(!drag)return;const m=st&&st.m;drag=null;if(m&&m!='mv'){render()
 (async()=>{
 fit();addEventListener('resize',fit);
 cov.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#2d3a2b;font:14px sans-serif">Memuat...</div>';
-let loc=await Promise.race([idbGet('inv'),new Promise(r=>setTimeout(()=>{NOIDB=true;r()},4000))]);
+let tmo=0;const lim=new Promise(r=>{tmo=setTimeout(()=>{NOIDB=true;r()},4000)});
+let loc=await Promise.race([idbGet('inv').then(v=>{clearTimeout(tmo);return v}),lim]);
 if(!loc){try{const j=lsG('inv');if(j)loc=JSON.parse(j)}catch(e){}}
 if(!loc){for(const sl of [slug||'utama','utama']){const d=(await oldGet('draft:'+sl))||(await oldGet('pub:'+sl));if(d&&d.S){loc=d.S;break}}}
 const own=!!slug&&lsG('own_'+slug)==='1'&&!!loc;
