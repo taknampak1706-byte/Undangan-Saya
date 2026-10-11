@@ -55,6 +55,7 @@ body.ed .el.sel>.tag{display:block;position:absolute;left:50%;top:calc(100% + 18
 .li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #333;gap:8px}.li input{width:auto}.sw{width:100%;height:42px;border-radius:8px;border:2px solid #555;color:#222;font-weight:600}
 #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 14px;border-radius:20px;z-index:400;font:13px sans-serif;display:none;max-width:90vw;text-align:center}
 body.hm #top,body.hm .pn{display:none}
+#ur{position:fixed;z-index:310;left:10px;top:calc(64px + env(safe-area-inset-top,0));display:flex;gap:6px}#ur button{padding:8px 12px;border-radius:20px;border:0;background:#1c1c1cd9;color:#fff;font:600 12px system-ui,sans-serif;box-shadow:0 2px 8px #0006}
 #hb{position:fixed;z-index:310;padding:8px 12px;border-radius:20px;border:0;background:#b8923f;color:#fff;font:600 12px system-ui,sans-serif;touch-action:none;box-shadow:0 2px 8px #0006}
 .nd{display:flex;gap:6px;align-items:center}.nd button{flex:0 0 44px;font-size:18px;touch-action:manipulation;user-select:none;-webkit-user-select:none}.nd input{flex:1;min-width:0;text-align:center}.stp{align-items:center;color:#bbb}.stp button.on{background:#b8923f}
 .h{margin:12px 0 4px;color:#d4a843;font-weight:600;font-size:12px}.pn p{margin:6px 0}.hint{color:#bbb;font-size:11px;word-break:break-all}.ok{color:#7ee09a}.er{color:#ff8d8d}.li b{color:#d4a843}
@@ -92,7 +93,7 @@ function persistNow(force){clearTimeout(pT);if(!dirty&&!force)return Promise.res
   const ls=()=>{try{localStorage.setItem('inv',JSON.stringify(S));return true}catch(e){if(Date.now()-(window.__tw||0)>15e3){window.__tw=Date.now();toast(NOIDB?'Penyimpanan besar browser tidak bisa dipakai, jadi hasil edit belum tersimpan. Matikan mode pribadi lalu muat ulang.':'Gagal menyimpan di HP ini. Ruang penyimpanan HP mungkin penuh.',7000)}return false}};
   if(NOIDB)return Promise.resolve(ls());
   return idbSet('inv',S).then(ok=>{if(ok){try{localStorage.removeItem('inv')}catch(e){}stInfo();return true}return ls()})}
-const persist=()=>{dirty=true;clearTimeout(pT);pT=setTimeout(persistNow,300)};
+const persist=()=>{dirty=true;clearTimeout(pT);pT=setTimeout(persistNow,300);hSched()};
 addEventListener('pagehide',()=>{persistNow()});document.addEventListener('visibilitychange',()=>{if(document.hidden)persistNow()});
 function stInfo(){const e=$('#stInfo');if(!e||!navigator.storage||!navigator.storage.estimate)return;navigator.storage.estimate().then(x=>{const mb=n=>Math.round(n/1048576*10)/10;e.textContent='Penyimpanan di HP ini terpakai '+mb(x.usage||0)+' MB dari sekitar '+mb(x.quota||0)+' MB yang tersedia.'}).catch(()=>{})}
 /* data besar dipecah agar muat di database */
@@ -216,9 +217,10 @@ p=`<p class=h>Bagikan sebagai link</p><div class=g><label class=w2>Nama alamat l
 if(lkLink)p+=`<p class=h>Link siap dibagikan</p><div class=g><label class=w2><input readonly value="${esc(lkLink)}"></label><button data-a=lkcp>Salin Link</button><button data-a=lkshare>Bagikan</button><label class=w2>Link khusus tamu (nama tamu)<input data-lk=to value="${esc(lkTo)}" placeholder="contoh: Budi Santoso"></label><button class=w2 data-a=lkcpt>Salin Link Tamu</button></div>`;
 p+=`<p class=hint>Perubahan baru tampil di link setelah Anda menekan Buat / Perbarui Link. Foto dan musik ikut tersimpan di link.</p><p class=h>Unduh dan simpan</p><p class=hint>Hasil edit tersimpan otomatis di HP ini, jadi tidak perlu mengedit ulang. Foto, musik, dan elemen disimpan di ruang penyimpanan browser yang besar.</p><p class=hint id=stInfo></p><div class=g><button class="pr w2" data-a=dlhtml>Unduh file undangan (.html)</button><button class=w2 data-a=dlshare>Bagikan file lewat WhatsApp</button><button class=w2 data-a=dljson>Unduh cadangan edit (.json)</button><label class=w2>Pulihkan dari cadangan<input type=file accept=".json,application/json" data-lk=res></label></div><p class=hint id=dlSt>${esc(dlMsg)}</p>`}
 if(tab=='list'){const row=e=>`<div class=li><span data-a=pick:${e.id}>${sel===e?'<b>'+lab(e)+'</b>':lab(e)}</span><span class=row><button data-a=lu:${e.id}>\u25B2</button><button data-a=ld:${e.id}>\u25BC</button><input type=checkbox data-a=vis:${e.id} ${e.vis?'checked':''}></span></div>`;p=`<p class=h>Lapisan halaman (atas ke bawah)</p>`+S.els.slice().reverse().map(row).join('')+`<p class=h>Lapisan cover (atas ke bawah)</p>`+S.cels.slice().reverse().map(row).join('')}
-ui.innerHTML=`<div id=top><button data-a=exit>\u2715 Keluar</button><button class=pr data-a=tab:share>Bagikan</button><button data-a=wa>WhatsApp</button></div><div class=pn><div class=tabs>${tabs}</div>${p}</div><button id=hb style="left:${hbx}px;top:${hby}px">${hm?'Tampilkan menu':'Sembunyikan menu'}</button><input type=file id=f hidden>`;if(tab=='share')stInfo()}
-function setEd(v){ed=v;hm=false;document.body.classList.remove('hm');document.body.classList.toggle('ed',v);if(v){if(slug)lsS('own_'+slug,'1');cov.style.display='none';au.pause();UI()}else{cov.style.display='none';cov.classList.remove('sm');ui.innerHTML=fabHTML()+'<input type=file id=f hidden>'}render();if(!v)observe()}
+ui.innerHTML=`<div id=top><button data-a=exit>\u2715 Keluar</button><button class=pr data-a=tab:share>Bagikan</button><button data-a=wa>WhatsApp</button></div><div class=pn><div class=tabs>${tabs}</div>${p}</div><div id=ur><button id=undoB data-a=undo>\u21B6 Batal</button><button id=redoB data-a=redo>\u21B7 Ulang</button></div><button id=hb style="left:${hbx}px;top:${hby}px">${hm?'Tampilkan menu':'Sembunyikan menu'}</button><input type=file id=f hidden>`;if(tab=='share')stInfo();hBtn()}
+function setEd(v){ed=v;hm=false;document.body.classList.remove('hm');document.body.classList.toggle('ed',v);if(v){if(slug)lsS('own_'+slug,'1');cov.style.display='none';au.pause();hInit();UI()}else{HU=[];HR=[];HC=null;cov.style.display='none';cov.classList.remove('sm');ui.innerHTML=fabHTML()+'<input type=file id=f hidden>'}render();if(!v)observe()}
 async function act(a){const[k,v]=[a.split(':')[0],a.slice(a.indexOf(':')+1)];
+if(k=='undo')return undo();if(k=='redo')return redo();
 if(k=='open')return open_();if(k=='edit'){cov.style.display='none';return setEd(true)}if(k=='exit')return setEd(false);
 if(k=='mute'){au.paused?au.play():au.pause();return muteBtn()}
 if(k=='tab'){tab=v;return UI()}
@@ -264,7 +266,7 @@ document.addEventListener('pointerdown',e=>{if(e.target.id!='hb')return;hd={x:e.
 document.addEventListener('pointermove',e=>{if(!hd)return;const dx=e.clientX-hd.x,dy=e.clientY-hd.y;if(Math.abs(dx)+Math.abs(dy)>8)hd.m=1;if(hd.m){hbx=Math.min(innerWidth-60,Math.max(0,hd.l+dx));hby=Math.min(innerHeight-40,Math.max(0,hd.t+dy));const b=$('#hb');if(b){b.style.left=hbx+'px';b.style.top=hby+'px'}}});
 document.addEventListener('pointerup',()=>{if(!hd)return;const m=hd.m;hd=null;if(!m){hm=!hm;document.body.classList.toggle('hm',hm);UI()}});
 /* geser, putar, dan ubah ukuran dengan jari */
-function pd(e){if(!ed)return;const el=e.target.closest('.el');if(!el)return;const o=ALL().find(x=>x.id==el.dataset.id);if(!o)return;sel=o;
+function pd(e){if(!ed)return;hFlush();const el=e.target.closest('.el');if(!el)return;const o=ALL().find(x=>x.id==el.dataset.id);if(!o)return;sel=o;
  const rc=el.getBoundingClientRect(),c={x:rc.left+rc.width/2,y:rc.top+rc.height/2},h=e.target.dataset?e.target.dataset.h:'';
  st={x:e.clientX,y:e.clientY,ox:o.x,oy:o.y,m:h||'mv',c,a0:Math.atan2(e.clientY-c.y,e.clientX-c.x)*180/Math.PI,r0:o.r||0,d0:Math.hypot(e.clientX-c.x,e.clientY-c.y),s0:(o.type=='text'||o.type=='btn')?(o.size||16):o.w};
  drag=el;try{el.setPointerCapture(e.pointerId)}catch(x){}
@@ -274,8 +276,21 @@ function pm(e){if(!drag||!sel)return;const o=sel;
  if(st.m=='rot'){const a=Math.atan2(e.clientY-st.c.y,e.clientX-st.c.x)*180/Math.PI;let r=st.r0+(a-st.a0);r=((r+180)%360+360)%360-180;const q=Math.round(r/15)*15;if(Math.abs(r-q)<4)r=q;o.r=Math.round(r);drag.style.transform=`translateX(-50%) rotate(${o.r}deg)`;const t=drag.querySelector('.tag');if(t)t.textContent=tagTx(o);persist();return}
  if(st.m=='rsz'){const k=Math.hypot(e.clientX-st.c.x,e.clientY-st.c.y)/Math.max(8,st.d0);if(o.type=='text'||o.type=='btn'){o.size=Math.max(8,Math.min(90,Math.round(st.s0*k)));const t=drag.querySelector('.tx,.cb');if(t)t.style.fontSize=`calc(var(--u)*${o.size})`}else{o.w=Math.max(30,Math.min(500,Math.round(st.s0*k)));drag.style.width=`calc(var(--u)*${o.w})`}persist();return}
  const u=uu()*(cov.contains(drag)&&cov.classList.contains('sm')?.6:1);o.x=st.ox+(e.clientX-st.x)/u;o.y=st.oy+(e.clientY-st.y)/u;drag.style.left=`calc(var(--u)*${o.x})`;drag.style.top=`calc(var(--u)*${o.y})`;persist()}
-function pu(){if(!drag)return;const m=st&&st.m;drag=null;if(m&&m!='mv'){render();UI()}}
+function pu(){if(!drag)return;const m=st&&st.m;drag=null;if(m&&m!='mv'){render();UI()}hFlush()}
 [app,cov].forEach(x=>{x.addEventListener('pointerdown',pd);x.addEventListener('pointermove',pm);x.addEventListener('pointerup',pu);x.addEventListener('pointercancel',pu)});
+/* ===== Batal dan ulang (undo, redo) ===== */
+let HU=[],HR=[],HC=null,HQ='',HT=0;
+const sigR=(k,v)=>typeof v==='string'&&v.length>300?v.length+':'+v.slice(0,30)+v.slice(-30):v;
+const sig=()=>JSON.stringify(S,sigR);
+function cl(o){if(Array.isArray(o))return o.map(cl);if(o&&typeof o==='object'){const r={};for(const k in o)r[k]=cl(o[k]);return r}return o}
+function hInit(){HU=[];HR=[];HC=cl(S);HQ=sig();hBtn()}
+function hSched(){if(!ed)return;clearTimeout(HT);HT=setTimeout(hFlush,500)}
+function hFlush(){clearTimeout(HT);if(!ed||!HC)return;const g=sig();if(g===HQ)return;HU.push(HC);if(HU.length>40)HU.shift();HR=[];HC=cl(S);HQ=g;hBtn()}
+function hApply(o){const sid=sel&&sel.id;setS(cl(o));sel=sid?ALL().find(x=>x.id==sid)||null:null;HC=o;HQ=sig();render();UI();hBtn()}
+function undo(){hFlush();if(!HU.length)return toast('Tidak ada yang bisa dibatalkan',1500);HR.push(HC);hApply(HU.pop());toast('Dibatalkan',1200)}
+function redo(){hFlush();if(!HR.length)return toast('Tidak ada yang bisa diulang',1500);HU.push(HC);hApply(HR.pop());toast('Diulang',1200)}
+function hBtn(){const u=$('#undoB'),r=$('#redoB');if(u)u.style.opacity=HU.length?1:.4;if(r)r.style.opacity=HR.length?1:.4}
+document.addEventListener('keydown',e=>{if(!ed||!(e.ctrlKey||e.metaKey))return;if(/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||''))return;const k=e.key.toLowerCase();if(k==='z'&&!e.shiftKey){e.preventDefault();undo()}else if(k==='y'||(k==='z'&&e.shiftKey)){e.preventDefault();redo()}});
 /* ===== Mulai ===== */
 (async()=>{
 fit();addEventListener('resize',fit);
